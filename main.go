@@ -30,7 +30,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/signup", handler.HandleSignUp)
-	//r.HandleFunc("/signin", handler.HandlerSignIn)
+	r.HandleFunc("/coba", handler.HandlerSignIn)
 	fmt.Println("server start at localhost:8080")
 	http.ListenAndServe(":8080", r)
 }
