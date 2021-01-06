@@ -26,11 +26,16 @@ func main() {
 
 		}
 	*/
-
+	// panggil fungsi initChace
+	handler.InitCache()
 	r := mux.NewRouter()
 
 	r.HandleFunc("/signup", handler.HandleSignUp)
 	r.HandleFunc("/coba", handler.HandlerSignIn)
+	//buat handle func untuk masuk dan welcome
+	r.HandleFunc("/masuk", handler.SignInSession)
+	r.HandleFunc("/welcome", handler.Welcome)
+	r.HandleFunc("/refresh", handler.Refresh)
 	fmt.Println("server start at localhost:8080")
 	http.ListenAndServe(":8080", r)
 }
