@@ -119,15 +119,39 @@ func SignInSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//Read data berdasarakan JSON jika ada
-	selectData := db.QueryRow("SELECT * FROM User_DB WHERE Username = ?", cres.Username)
+	selectData := db.QueryRow("SELECT Password FROM User_DB WHERE Username = ?", cres.Username)
 
+	if err != nil {
+		//jika ada error mengembalikan nilai 500
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	//buat instence baru untuk credentials untuk menampung data dari database
+	storageCerds := &Credentials{}
+	err = selectData.Scan(&storageCerds.Password)
+	if err != nil {
+		//jika tidak ditemukan usernamya balikkan nilai 401
+		if err == sql.ErrNoRows {
+			fmt.Println(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		//jika ada error lain akan mengembalikan nilai 500
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	//lakukan perbandingan inputan user hash dengan db
+	if err = bcrypt.CompareHashAndPassword([]byte(storageCerds.Password), []byte(cres.Password)); err != nil {
+		//jika tidak cocok kemablikan nilai 401
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 	//jika password ada dan sama dengan password yang ada sama dengan password
 	//yang diberikan maka bisa ke langkah selanjunya
 	//tetapi jika tidak kembalikan status "Unauthorized"
-	if selectData == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	fmt.Println(storageCerds)
 
 	//buat random session token
 	sessionToken := uuid.NewV4().String()
